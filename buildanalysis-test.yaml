@@ -1,0 +1,7 @@
+apiVersion: thoth-station.ninja/v1alpha1
+kind: BuildAnalysis
+metadata:
+  name: a-test-buildloganalysis-3
+spec:
+  buildlog:
+    url: https://paas.../builds/user-api/19592

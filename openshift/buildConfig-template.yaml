@@ -26,22 +26,22 @@ objects:
       labels:
         app: thoth
         component: build-analyser
-      name: build-analysers
+      name: build-analyser
     spec:
       name: ${IMAGE_STREAM_TAG}
 
   - apiVersion: v1
     kind: BuildConfig
     metadata:
-      name: build-analysers
+      name: build-analyser
       labels:
-        app: thoth-core
+        app: thoth
         component: build-analyser
     spec:
       output:
         to:
           kind: ImageStreamTag
-          name: "build-analysers:${IMAGE_STREAM_TAG}"
+          name: "build-analyser:${IMAGE_STREAM_TAG}"
       source:
         type: Git
         git:

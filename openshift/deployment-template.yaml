@@ -51,7 +51,7 @@ objects:
     metadata:
       labels:
         service: build-analyser
-        app: thoth-core
+        app: thoth
         component: build-analyser
       name: build-analyser
     spec:
@@ -134,4 +134,4 @@ objects:
               - build-analyser
             from:
               kind: ImageStreamTag
-              name: 'build-analusers-api:latest'
+              name: 'build-analyser:latest'

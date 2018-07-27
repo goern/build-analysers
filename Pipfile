@@ -9,6 +9,8 @@ flask-restplus = "*"
 prometheus-client = "*"
 "ruamel.yaml" = "<=0.15"
 requests = "*"
+daiquiri = "*"
+kubernetes = "*"
 
 [dev-packages]
 "autopep8" = "*"
@@ -17,7 +19,6 @@ pytest-bdd = "*"
 pytest-cov = "*"
 pytest-datafiles = "*"
 coala-bears = "*"
-pylint = "*"
 
 [requires]
 python_version = "3.6"
