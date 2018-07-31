@@ -5,9 +5,21 @@ import os
 
 from setuptools import setup
 
+
+def get_version():
+    with open(os.path.join('thoth_build_analysers', '__init__.py')) as f:
+        content = f.readlines()
+
+    for line in content:
+        if line.startswith('__version__ ='):
+            # dirty, remove trailing and leading chars
+            return line.split(' = ')[1][1:-2]
+    raise ValueError("No version identifier found")
+
+
 setup(
     name='thoth-build-analysers',
-    version='0.1.0-dev',
+    version=get_version(),
     author='Christoph Görn',
     author_email='goern@redhat.com',
     packages=['thoth_build_analysers', ],

@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
-flask-restplus = "*"
 prometheus-client = "*"
 "ruamel.yaml" = "<=0.15"
 requests = "*"
@@ -15,9 +13,7 @@ kubernetes = "*"
 [dev-packages]
 "autopep8" = "*"
 pytest = "*"
-pytest-bdd = "*"
 pytest-cov = "*"
-pytest-datafiles = "*"
 coala-bears = "*"
 
 [requires]

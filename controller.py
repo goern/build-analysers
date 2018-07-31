@@ -19,14 +19,18 @@
 """Thoth: Build Analyses Controller."""
 
 import os
+import tempfile
 import time
 import logging
 import json
 import yaml
 from datetime import datetime
 
+import requests
 import daiquiri
 from kubernetes import client, config, watch
+
+from thoth_build_analysers import openshift
 
 
 DEBUG = bool(os.getenv('DEBUG', True))
@@ -39,26 +43,37 @@ _LOGGER = daiquiri.getLogger(__name__)
 
 
 def analyse_build(crds, obj):
+    """Get the given BuildLog and analyse it."""
     metadata = obj.get("metadata")
     namespace = metadata.get("namespace")
     name = metadata.get("name")
 
     time.sleep(10)
 
-    _LOGGER.debug(f"downloading BuildLog from {obj['spec']['buildlog']['url']}")
-    obj['status'] = {}
-    obj['status']['conditions'] = []
+    obj['status']['phase'] = 'Running'
+    obj['status'] = {'conditions': {'type': 'Downloaded', 'status': False}}
 
-    downloaded = {}
-    downloaded['type'] = 'Downloaded'
-    downloaded['status'] = 'True'
+    _LOGGER.debug(
+        f"downloading BuildLog from {obj['spec']['buildlog']['url']}")
+    # Use the TemporaryFile context manager for easy clean-up
+    response = requests.get(obj['spec']['buildlog']['url'])
+    # TODO exception handling of HTTP
+
+    obj['status']['conditions'].append({'type': 'Downloaded', 'status': True})
+
+    with tempfile.TemporaryFile() as tmp:
+        tmp.write(response.content)
+
+        result = openshift.analyse(name, response.content)
+
+        obj['result'] = result
+
     # downloaded['lastTransitionTime'] = datetime.utcnow()
-
-    obj['status']['conditions'].append(downloaded)
 
     obj['status']['phase'] = 'Finished'
 
-    crds.replace_namespaced_custom_object(API_GROUP, VERSION, namespace, PLURAL, name, obj)
+    crds.replace_namespaced_custom_object(
+        API_GROUP, VERSION, namespace, PLURAL, name, obj)
 
 
 if __name__ == "__main__":
@@ -79,8 +94,9 @@ if __name__ == "__main__":
 
     resource_version = ''
     while True:
-        stream = watch.Watch().stream(crds.list_namespaced_custom_object, API_GROUP,
-                             VERSION, 'myproject', PLURAL, resource_version=resource_version)
+        stream = watch.Watch().stream(
+            crds.list_namespaced_custom_object, API_GROUP,
+            VERSION, 'myproject', PLURAL, resource_version=resource_version)
 
         for event in stream:
             _LOGGER.debug(event)
@@ -94,7 +110,8 @@ if __name__ == "__main__":
             metadata = obj.get('metadata')
             resource_version = metadata['resourceVersion']
             name = metadata['name']
-            _LOGGER.debug(f"Handling {operation} on {name}.resource_version={resource_version}")
+            _LOGGER.debug(
+                f"Handling {operation} on {name}.resource_version={resource_version}")
 
             status = obj.get('status')
 
